@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+    <title>IndexDB</title>
+</head>
+<body onload="obterUsuarios()">
+<div class="caixa_principal sombra">
+    <div class="usuarios_lista sombra">
+        <div class="usuarios_tabela">
+            <table id="tabela_usuario">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Idade</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="usuarios sombra">
+        <div class="usuarios_titulo">
+            <h3>Usuários</h3>
+            <hr>
+        </div>
+        <div class="usuarios_conteudo">
+            <div class="formControl">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome">
+            </div>
+            <div class="formControl">
+                <label for="idade">Idade</label>
+                <input type="number" id="idade" name="idade">
+            </div>
+            <div class="formControl">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email">
+            </div>
+            <div class="formControl">
+                <button onclick="adicionarUsuario()">Adicionar Usuário</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
