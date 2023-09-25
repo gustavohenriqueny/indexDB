@@ -1,50 +1,77 @@
 var usuarios = [];
-var openRequest = indexedDB.open("MCTI", 1);
 var banco;
+const nomeBanco = "APP";
+const objetoUsuario = "USUARIO";
+const versaoBanco = 1;
 
-openRequest.onupgradeneeded = () => {
-    banco = openRequest.result;
-    let objectStore = banco.createObjectStore("Usuarios", {keyPath: "id", autoIncrement: true});
-    objectStore.createIndex("Nome", "nome");
-    objectStore.createIndex("Idade", "idade");
-    objectStore.createIndex("Email", "email", {unique: true});
+var inicializarAplicacao = async () => {
+    inicializarBanco();
+    await obterUsuarios();
 };
 
-openRequest.onsuccess = () => {
-    banco = openRequest.result;
-    let transacao = banco.transaction("Usuarios", "readwrite");
-    let store = transacao.objectStore("Usuarios");
-    let indexNome = store.index("Nome");
-};
+let inicializarBanco = () => {
+    return new Promise((resolve, reject) => {
+        if(!banco){
+            const requisicao = window.indexedDB.open(nomeBanco, versaoBanco);
+            requisicao.onupgradeneeded = (event) => {
+            const banco = event.target.result;
+            if(!banco.objectStoreNames.contains(objetoUsuario)) {
+                let store = banco.createObjectStore(objetoUsuario, { keyPath: "nome"});
+                store.createIndex("Nome", "nome");
+                store.createIndex("Idade", "idade");
+                store.createIndex("Email", "email");  
+            };
+            console.log("Banco criado com sucesso!");
+        };
+        requisicao.onsuccess = (event) => resolve(event.target.result);
+        requisicao.onerror = (event) => reject(event.target.error);
+        } else {
+            resolve(banco);
+        }
+    });
+}
 
 let adicionarUsuario = () => {
-    let nome = document.getElementById("nome").value;
-    let idade = document.getElementById("idade").value;
-    let email = document.getElementById("email").value;
-    let transacao = banco.transaction("Usuarios", "readwrite");
-    let store = transacao.objectStore("Usuarios");
-    store.put({nome: nome, idade: idade, email: email});
-    console.log(`Usuário ${nome} adicionado com sucesso...`);
-    limparInputs();
-    obterUsuarios();
-};
-
-let limparInputs = () => {
-    document.getElementById("nome").value = "";
-    document.getElementById("idade").value = "";
-    document.getElementById("email").value = "";
+    return new Promise(async (resolve, reject) => {
+        banco = await inicializarBanco();
+        const transacao = banco.transaction(objetoUsuario, "readwrite");
+        const objectStore = transacao.objectStore(objetoUsuario);
+        const requisicao = objectStore.add(usuario());
+        requisicao.onsuccess = (event) => resolve(event.target.result);
+        requisicao.onerror = (event) => reject(event.target.error);
+        limparInputs();
+        limparTabela();
+        obterUsuarios();
+    });
 };
 
 let obterUsuarios = () => {
-    let transacao = banco.transaction("Usuarios", "readonly");
-    let store = transacao.objectStore("Usuarios");
-    let consulta = store.getAll();
-    consulta.onsuccess = () => {
-        usuarios = consulta.result;
-        limparTabela();
-        adicionarUsuariosATabela(consulta.result);
-    };
+    return new Promise(async (resolve, reject) => {
+        banco = await inicializarBanco();
+        const transacao = banco.transaction(objetoUsuario, "readonly");
+        const store = transacao.objectStore(objetoUsuario);
+        const consulta = store.getAll();
+        consulta.onsuccess = (event) => {
+            usuarios = event.target.result;
+            adicionarUsuariosATabela(usuarios);
+        };
+        consulta.onerror = (event) => reject(event.target.error);
+    });
 };
+
+// let buscarUsuario = () => {
+//     let requisicao = window.indexedDB.open(nomeBanco);
+//     requisicao.onsuccess = () => {
+//         banco = openDBRequest.result;
+//         let transacao = banco.transaction("Usuario", "readonly");
+//         let store = transacao.objectStore("Usuario");
+//         let indexIdade = store.index("Idade");
+//         let consulta = indexIdade.get("12");
+//         consulta.onsuccess = () => {
+//             console.log(consulta.result);
+//         };
+//     };
+// };
 
 let limparTabela = () => {
     const tabelaUsuarios = document.getElementById("tabela_usuario");
@@ -57,7 +84,7 @@ let limparTabela = () => {
 let adicionarUsuariosATabela = (usuarios) => {
     const tabelaUsuarios = document.getElementById("tabela_usuario");
     const tbody = tabelaUsuarios.querySelector("tbody");
-    usuarios.forEach(usuario => {
+    usuarios?.forEach(usuario => {
         const linha = document.createElement("tr");
         const colunaNome = document.createElement("td");
         const colunaIdade = document.createElement("td");
@@ -73,4 +100,19 @@ let adicionarUsuariosATabela = (usuarios) => {
 
         tbody.appendChild(linha);
     });
+};
+
+let limparInputs = () => {
+    document.getElementById("nome").value = "";
+    document.getElementById("idade").value = "";
+    document.getElementById("email").value = "";
+};
+
+
+let usuario = () => {
+    return {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        email: document.getElementById("email").value
+    }
 };

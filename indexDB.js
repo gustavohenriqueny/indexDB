@@ -1,6 +1,7 @@
+// Abre o banco localmente no navegador.
 var request = window.indexedDB.open("MCTI", 1);
-var banco;
 
+// E executado quando o banco vai ser atualizado/criado.
 openRequest.onupgradeneeded = () => {
     banco = openRequest.result;
     let objectStore = banco.createObjectStore("Usuarios", {keyPath: "id", autoIncrement: true});
