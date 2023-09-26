@@ -11,20 +11,22 @@ var inicializarAplicacao = async () => {
 
 let inicializarBanco = () => {
     return new Promise((resolve, reject) => {
-        if(!banco){
+        if (!banco) {
             const requisicao = window.indexedDB.open(nomeBanco, versaoBanco);
             requisicao.onupgradeneeded = (event) => {
-            const banco = event.target.result;
-            if(!banco.objectStoreNames.contains(objetoUsuario)) {
-                let store = banco.createObjectStore(objetoUsuario, { keyPath: "nome"});
-                store.createIndex("Nome", "nome");
-                store.createIndex("Idade", "idade");
-                store.createIndex("Email", "email");  
+                const banco = event.target.result;
+                if (!banco.objectStoreNames.contains(objetoUsuario)) {
+                    let store = banco.createObjectStore(objetoUsuario, {
+                        keyPath: "nome"
+                    });
+                    store.createIndex("Nome", "nome");
+                    store.createIndex("Idade", "idade");
+                    store.createIndex("Email", "email");
+                };
+                console.log("Banco criado com sucesso!");
             };
-            console.log("Banco criado com sucesso!");
-        };
-        requisicao.onsuccess = (event) => resolve(event.target.result);
-        requisicao.onerror = (event) => reject(event.target.error);
+            requisicao.onsuccess = (event) => resolve(event.target.result);
+            requisicao.onerror = (event) => reject(event.target.error);
         } else {
             resolve(banco);
         }
@@ -84,7 +86,7 @@ let limparTabela = () => {
 let adicionarUsuariosATabela = (usuarios) => {
     const tabelaUsuarios = document.getElementById("tabela_usuario");
     const tbody = tabelaUsuarios.querySelector("tbody");
-    usuarios?.forEach(usuario => {
+    usuarios ? .forEach(usuario => {
         const linha = document.createElement("tr");
         const colunaNome = document.createElement("td");
         const colunaIdade = document.createElement("td");
